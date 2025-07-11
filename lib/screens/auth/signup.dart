@@ -54,6 +54,10 @@ class _SignupState extends State<Signup> {
               // 🔁 الانتقال إلى صفحة التحقق
               Navigator.pushNamed(
                 context,
+
+              print(" Navigating to verification screen with email: ${state.email}");
+
+              Navigator.of(context).pushReplacementNamed(
                 AppRoute.verify,
                 arguments: {
                   'email': email.text.trim(),
@@ -61,6 +65,9 @@ class _SignupState extends State<Signup> {
                 },
               );
             } else if (state is SignupFailure) {
+
+              print(" Signup failed: ${state.error}");
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.error), backgroundColor: Colors.red),
               );
@@ -77,14 +84,18 @@ class _SignupState extends State<Signup> {
                 key: _formKey,
                 child: ListView(
                   children: [
+
                     const SizedBox(height: 30),
+
                     const Center(
                       child: Text(
                         'إنشاء حساب',
                         style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                       ),
                     ),
+
                     const SizedBox(height: 30),
+
                     CustomInputField(
                       controller: name,
                       label: 'اسم المستخدم',
@@ -92,7 +103,9 @@ class _SignupState extends State<Signup> {
                       icon: Icons.person,
                       validator: Validators.validateName,
                     ),
+
                     const SizedBox(height: 20),
+
                     CustomInputField(
                       controller: email,
                       label: 'البريد الإلكتروني',
@@ -100,7 +113,9 @@ class _SignupState extends State<Signup> {
                       icon: Icons.email,
                       validator: Validators.validateEmail,
                     ),
+
                     const SizedBox(height: 20),
+
                     CustomInputField(
                       controller: password,
                       label: 'كلمة المرور',
@@ -109,7 +124,9 @@ class _SignupState extends State<Signup> {
                       isPassword: true,
                       validator: Validators.validatePassword,
                     ),
+
                     const SizedBox(height: 20),
+
                     CustomInputField(
                       controller: passwordConfirmation,
                       label: 'تأكيد كلمة المرور',
@@ -121,7 +138,9 @@ class _SignupState extends State<Signup> {
                         password.text,
                       ),
                     ),
+
                     const SizedBox(height: 20),
+
                     CustomInputField(
                       controller: phoneNumber,
                       label: 'رقم الهاتف',
@@ -129,7 +148,9 @@ class _SignupState extends State<Signup> {
                       icon: Icons.phone_android,
                       validator: Validators.validatePhone,
                     ),
+
                     const SizedBox(height: 30),
+
                     BottumAuth(
                       title: "إنشاء حساب",
                       onPressed: () {
@@ -144,7 +165,9 @@ class _SignupState extends State<Signup> {
                         }
                       },
                     ),
+
                     const SizedBox(height: 20),
+
                     BottumGo(
                       questionText: "لديك حساب ؟ ",
                       actionText: "تسجيل الدخول",

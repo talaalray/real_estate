@@ -10,6 +10,7 @@ import '../../blocs/onboarding/onboarding_cubit.dart';
 import '../../widgets/blue_shadow.dart';
 
 class OnboardingScreen extends StatelessWidget {
+
   const OnboardingScreen({super.key});
 
   static final List<Map<String, String>> onboardingData = [

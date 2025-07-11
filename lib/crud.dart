@@ -58,13 +58,15 @@ class Crud {
 
   Future<Map<String, dynamic>?> postRequest(String url, Map<String, dynamic> data) async {
     try {
+      print("Sending data: $data"); // إضافة لطباعة البيانات المرسلة
+
       var response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(data),
+        body: jsonEncode(data), // تأكد من استخدام jsonEncode
       );
 
       print("Status code: ${response.statusCode}");
@@ -72,13 +74,10 @@ class Crud {
 
       return jsonDecode(response.body);
     } catch (e) {
-      print("Error Catch $e");
-      return {
-        "status": "error",
-        "error": e.toString(),
-      };
+      print("Error in postRequest: $e");
+      return null;
     }
+  }
   }
 
 
-}

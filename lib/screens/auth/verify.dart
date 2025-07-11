@@ -166,6 +166,18 @@ class Verification extends StatelessWidget {
           child: BlocConsumer<VerifyCubit, VerifyState>(
             listener: (context, state) {
               if (state is VerifySuccess) {
+
+                print('Verification successful, navigating to home');
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.read<OtpCubit>().clear();
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    AppRoute.home,
+                        (route) => false,
+                  );
+                });
+              } else if (state is VerifyFailure) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text("تم التحقق بنجاح"),
@@ -199,6 +211,11 @@ class Verification extends StatelessWidget {
                   ),
                 );
                 context.read<OtpCubit>().clear();
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             builder: (context, state) {
@@ -242,6 +259,44 @@ class Verification extends StatelessWidget {
                 OtpFields(),
                 const SizedBox(height: 20),
               ],
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+
+                  const SizedBox(height: 40),
+
+                  Image.asset(AppImageAsset.verify, height: 200),
+
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    'يرجى إدخال الرمز المرسل إلى البريد الالكتروني التالي',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    email,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  OtpFields(),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -265,6 +320,22 @@ class Verification extends StatelessWidget {
                     }
                   },
                 ),
+            title: "إرسال",
+            onPressed: () {
+              final code = context.read<OtpCubit>().fullCode;
+              print('Attempting verification with code: $code');
+              if (code.length == 4) {
+                context.read<VerifyCubit>().verifyCode(email, code);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("يجب إدخال الكود المكون من 4 أرقام"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
         ),
       ],
     );
