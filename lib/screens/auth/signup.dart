@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:real_estate/blocs/auth/auth_storage.dart';
 import 'package:real_estate/constans/routes.dart';
 import 'package:real_estate/crud.dart';
 import 'package:real_estate/function/validators.dart';
@@ -7,6 +8,7 @@ import 'package:real_estate/widgets/auth/bottum_go.dart';
 import 'package:real_estate/widgets/auth/bouttom_auth.dart';
 import '../../blocs/auth/signup/signup_cubit.dart';
 import '../../blocs/auth/signup/signup_state.dart';
+
 import '../../widgets/auth/custom_input_field.dart';
 import 'login.dart';
 
@@ -43,22 +45,24 @@ class _SignupState extends State<Signup> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: BlocConsumer<SignupCubit, SignupState>(
-          listener: (context, state) {
-            print("🔄 BlocListener state: $state");
-
+          listener: (context, state) async {
             if (state is SignupSuccess) {
-              print("✅ Navigating to verification screen with email: ${state.email}");
+              // ✅ حفظ البيانات تم سابقًا داخل SignupCubit
+              final user = await AuthStorage.getUserData();
+              print("✅ تم التسجيل باسم: ${user['name']}");
 
-              // ✅ التنقل إلى صفحة التحقق
-              Navigator.of(context).pushReplacementNamed(
+              // 🔁 الانتقال إلى صفحة التحقق
+              Navigator.pushNamed(
+                context,
                 AppRoute.verify,
-                arguments: state.email,
+                arguments: {
+                  'email': email.text.trim(),
+                  'fromReset': false,
+                },
               );
             } else if (state is SignupFailure) {
-              print("❌ Signup failed: ${state.error}");
-
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.error)),
+                SnackBar(content: Text(state.error), backgroundColor: Colors.red),
               );
             }
           },
@@ -66,7 +70,8 @@ class _SignupState extends State<Signup> {
             if (state is SignupLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return Container(
+
+            return Padding(
               padding: const EdgeInsets.all(20),
               child: Form(
                 key: _formKey,
@@ -76,10 +81,7 @@ class _SignupState extends State<Signup> {
                     const Center(
                       child: Text(
                         'إنشاء حساب',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -114,8 +116,10 @@ class _SignupState extends State<Signup> {
                       hintText: 'اعد إدخال كلمة المرور',
                       icon: Icons.lock,
                       isPassword: true,
-                      validator: (value) =>
-                          Validators.validatePasswordConfirmation(value, password.text),
+                      validator: (value) => Validators.validatePasswordConfirmation(
+                        value,
+                        password.text,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     CustomInputField(
@@ -127,12 +131,12 @@ class _SignupState extends State<Signup> {
                     ),
                     const SizedBox(height: 30),
                     BottumAuth(
-                      title: "انشاء حساب",
+                      title: "إنشاء حساب",
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           BlocProvider.of<SignupCubit>(context).signUp(
-                            name: name.text,
-                            email: email.text,
+                            name: name.text.trim(),
+                            email: email.text.trim(),
                             password: password.text,
                             passwordConfirmation: passwordConfirmation.text,
                             phoneNumber: phoneNumber.text,

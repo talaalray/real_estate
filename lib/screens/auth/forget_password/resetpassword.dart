@@ -1,141 +1,150 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:real_estate/constans/image_url.dart';
-// import 'package:real_estate/crud.dart';
-// import 'package:real_estate/function/validators.dart';
-// import 'package:real_estate/screens/auth/signup.dart';
-// import 'package:real_estate/widgets/auth/bottum_go.dart';
-// import 'package:real_estate/widgets/auth/bouttom_auth.dart';
-// import '../../../constans/color.dart';
-// import '../../../widgets/auth/custom_input_field.dart';
-//
-//
-// class Login extends StatefulWidget {
-//   const Login({super.key});
-//
-//   @override
-//   State<Login> createState() => _LoginState();
-// }
-// class _LoginState extends State<Login> {
-//   final _formKey = GlobalKey<FormState>();
-//   final password = TextEditingController();
-//   final confirm_password = TextEditingController();
-//
-//   @override
-//   void dispose() {
-//     email.dispose();
-//     password.dispose();
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // return BlocProvider(
-//     //   create: (_) => LoginCubit(Crud()),
-//     //   child: Scaffold(
-//     //     backgroundColor: Colors.white,
-//     //     body: BlocConsumer<LoginCubit, LoginState>(
-//     //       listener: (context, state) {
-//     //         if (state is LoginSuccess) {
-//     //           Navigator.of(context).pushNamedAndRemoveUntil("home", (route) => false);
-//     //         } else if (state is LoginFailure) {
-//     //           ScaffoldMessenger.of(context).showSnackBar(
-//     //             SnackBar(content: Text(state.error)),
-//     //           );
-//     //         }
-//     //       },
-//     //       builder: (context, state) {
-//     //         if (state is LoginLoading) {
-//     //           return const Center(child: CircularProgressIndicator());
-//     //         }
-//             return ListView(
-//               padding: const EdgeInsets.all(20),
-//               children: [
-//                 const SizedBox(height: 60),
-//                 Center(
-//                   child: Image.asset(AppImageAsset.login),
-//                 ),
-//                 const SizedBox(height: 10),
-//                  Text(
-//                     'تعديل كلمة المرور',
-//                     style: TextStyle(
-//                       fontSize: 40,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//
-//                 const SizedBox(height: 30),
-//                 Form(  // <-- أضف Form هنا
-//                   key: _formKey,
-//                   child: Column(
-//                     children: [
-//                       CustomInputField(
-//                         controller: password,
-//                         label: 'كلمة المرور الجديدة',
-//                         hintText: 'ادخل كلمة المرور الجديدة',
-//                         icon: Icons.lock,
-//                         isPassword: true,
-//                         validator: Validators.validatePassword,
-//                       ),
-//                       const SizedBox(height: 20),
-//                       CustomInputField(
-//                         controller: confirm_password,
-//                         label: 'تأكيد كلمة المرور',
-//                         hintText: 'اعد إدخال كلمة المرور',
-//                         icon: Icons.lock,
-//                         isPassword: true,
-//                         validator: (value) =>
-//                             Validators.validatePasswordConfirmation(value, password.text),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 Align(
-//                   alignment: Alignment.centerLeft,
-//                   child: TextButton(
-//                     onPressed: () {
-//                       Navigator.push(
-//                         context,
-//                         MaterialPageRoute(builder: (_) => const Signup()),
-//                       );
-//                     },
-//                     child: Text(
-//                       'هل نسيت كلمة المرور؟',
-//                       style: TextStyle(
-//                         color: AppColor.grey2,
-//                         fontWeight: FontWeight.w500,
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 30),
-//                 BottumAuth(
-//                   title: "تسجيل الدخول",
-//                   onPressed: () {
-//                     if (_formKey.currentState!.validate()) {
-//                       BlocProvider.of<LoginCubit>(context).login(
-//                         email: email.text,
-//                         password: password.text,
-//                       );
-//                     }
-//                   },
-//                 ),
-//                 const SizedBox(height: 20),
-//                 BottumGo(
-//                   questionText: "ليس لديك حساب؟ ",
-//                   actionText: "إنشاء حساب",
-//                   onPressed: () {
-//                     Navigator.push(
-//                       context,
-//                       MaterialPageRoute(builder: (_) => const Signup()),
-//                     );
-//                   },
-//                 ),
-//               ],
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
+import 'package:flutter/material.dart';
+import 'package:real_estate/crud.dart';
+import 'package:real_estate/constans/links_api.dart';
+import 'package:real_estate/constans/routes.dart';
+
+class ResetPassword extends StatefulWidget {
+  final String email;
+
+  const ResetPassword({super.key, required this.email});
+
+  @override
+  State<ResetPassword> createState() => _ResetPasswordState();
+}
+
+class _ResetPasswordState extends State<ResetPassword> {
+  final TextEditingController otpController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  bool isLoading = false;
+  final _formKey = GlobalKey<FormState>();
+
+  void showMessage(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: color),
+    );
+  }
+
+  Future<void> resetPassword() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final response = await Crud().postRequest(AppLink.resetPassword, {
+        "email": widget.email.trim(),
+        "otp": otpController.text.trim(),
+        "password": newPasswordController.text.trim(),
+        "password_confirmation": confirmPasswordController.text.trim(),
+      });
+
+      print("🔁 Reset response: $response");
+
+      if (response != null &&
+          (response['status'] == "success" ||
+              response['message'].toString().toLowerCase().contains("reset"))) {
+        showMessage(" تم تغيير كلمة المرور بنجاح", Colors.green);
+
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.pushNamedAndRemoveUntil(context, AppRoute.login, (route) => false);
+        });
+      } else {
+        showMessage(response?['message'] ?? "فشل في تغيير كلمة المرور", Colors.red);
+      }
+    } catch (e) {
+      showMessage("حدث خطأ غير متوقع: ${e.toString()}", Colors.red);
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("إعادة تعيين كلمة المرور")),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                "البريد المرتبط بالحساب",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                widget.email,
+                style: const TextStyle(color: Colors.blue, fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+
+              _buildField(
+                controller: otpController,
+                label: "رمز التحقق OTP",
+                keyboardType: TextInputType.number,
+                validator: (val) => (val == null || val.length != 4) ? "أدخل رمز مكون من 4 أرقام" : null,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildField(
+                controller: newPasswordController,
+                label: "كلمة المرور الجديدة",
+                obscureText: true,
+                validator: (val) => (val == null || val.length < 6)
+                    ? "كلمة المرور يجب أن تكون 6 أحرف على الأقل"
+                    : null,
+              ),
+
+              const SizedBox(height: 20),
+
+              _buildField(
+                controller: confirmPasswordController,
+                label: "تأكيد كلمة المرور",
+                obscureText: true,
+                validator: (val) =>
+                    val != newPasswordController.text ? "كلمتا المرور غير متطابقتين" : null,
+              ),
+
+              const SizedBox(height: 30),
+
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      onPressed: resetPassword,
+                      icon: const Icon(Icons.lock_reset),
+                      label: const Text("تحديث كلمة المرور"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        prefixIcon: obscureText ? const Icon(Icons.lock_outline) : null,
+      ),
+    );
+  }
+}

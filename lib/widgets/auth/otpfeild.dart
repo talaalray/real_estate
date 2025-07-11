@@ -4,7 +4,7 @@ import 'package:real_estate/constans/color.dart';
 import '../../blocs/auth/verify/otp_cubit.dart';
 
 class OtpFields extends StatelessWidget {
-   OtpFields({super.key});
+   const OtpFields({super.key});
 
   @override
   Widget build(BuildContext context) {
