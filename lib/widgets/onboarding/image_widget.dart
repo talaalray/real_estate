@@ -5,7 +5,7 @@ class ImageWidget extends StatelessWidget {
 
   final String url;
 
-  ImageWidget({super.key, required this.url});
+  const ImageWidget({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {

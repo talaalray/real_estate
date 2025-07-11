@@ -3,25 +3,58 @@ import 'dart:convert';
 
 class Crud {
 
-  Future<Map<String, dynamic>?> getRequest(String url) async {
+  Future<Map<String, dynamic>?> getRequest(String url, {String? token}) async {
     try {
-      var response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-        },
-      );
+      var headers = {'Accept': 'application/json'};
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      var response = await http.get(Uri.parse(url), headers: headers);
+      print("🔓 GET Logout status: ${response.statusCode}");
+      print("🔓 GET Logout body: ${response.body}");
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
-        print("Error status code: ${response.statusCode}");
         return null;
       }
     } catch (e) {
-      print("Error Catch $e");
+      print("❌ GET Error: $e");
       return null;
     }
   }
+
+
+
+//  Future<Map<String, dynamic>?> getRequest(String url, {String? token}) async {
+//     try {
+//       var headers = {
+//         'Accept': 'application/json',
+//       };
+//       if (token != null && token.isNotEmpty) {
+//         headers['Authorization'] = 'Bearer $token'; // ✅ ضروري!
+//       } else {
+//         print("🚨 تحذير: التوكن فارغ أو غير موجود!");
+//       }
+
+//       var response = await http.get(Uri.parse(url), headers: headers);
+
+//       print("🔓 GET Logout status: ${response.statusCode}");
+//       print("🔓 GET Logout body: ${response.body}");
+
+//       if (response.statusCode == 200 || response.statusCode == 201) {
+//         return jsonDecode(response.body);
+//       } else {
+//         print("❌ خطأ: ${response.statusCode}");
+//         return null;
+//       }
+//     } catch (e) {
+//       print("⚠️ خطأ أثناء الاتصال بالسيرفر: $e");
+//       return null;
+//     }
+//   }
+
 
   Future<Map<String, dynamic>?> postRequest(String url, Map<String, dynamic> data) async {
     try {
